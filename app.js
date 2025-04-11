@@ -21,34 +21,41 @@ const search = document.getElementById('search');
 let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
 
 function navigate(tab) {
+  contenido.innerHTML = `<p>Cargando...</p>`;
+
   switch (tab) {
     case 'personajes':
       fetch(`${apiBase}/characters`)
         .then(res => res.json())
         .then(data => mostrarLista(data, 'personaje'));
       break;
+
     case 'casas':
       fetch(`${apiBase}/houses`)
         .then(res => res.json())
         .then(data => mostrarLista(data, 'casa'));
       break;
-    case 'favoritos':
-      mostrarFavoritos();
-      break;
-    case 'registro':
-      mostrarFormularioRegistro();
-      break;
+
     case 'libros':
       fetch(`${apiBase}/books`)
         .then(res => res.json())
         .then(data => mostrarLista(data, 'libro'));
       break;
+
     case 'capitulos':
       fetch(`${apiBase}/random/5`)
         .then(res => res.json())
         .then(data => mostrarLista(data, 'capitulo'));
       break;
-    case 'inicio':
+
+    case 'favoritos':
+      mostrarFavoritos();
+      break;
+
+    case 'registro':
+      mostrarFormularioRegistro();
+      break;
+
     default:
       contenido.innerHTML = `<h2>Bienvenido a Juego de Tronos App</h2>`;
   }
@@ -57,13 +64,16 @@ function navigate(tab) {
 function mostrarLista(data, tipo) {
   contenido.innerHTML = `<h2>${tipo.toUpperCase()}S</h2>`;
   data.forEach(item => {
-    const nombre = item.name || item;
-    const imagen = item.image || "";
+    const nombre = item.name || item.character?.name || item;
+    const imagen = item.image || item.character?.image || "";
+    const cita = item.sentence || item.house || item.text || "";
+
     contenido.innerHTML += `
       <div class="card">
         ${imagen ? `<img src="${imagen}" alt="${nombre}">` : ""}
         <div>
-          <strong>${nombre}</strong>
+          <strong>${nombre}</strong><br>
+          <small>${cita}</small>
           <button onclick="agregarFavorito('${nombre}')">❤️</button>
         </div>
       </div>`;
@@ -80,6 +90,11 @@ window.agregarFavorito = function(nombre) {
 
 function mostrarFavoritos() {
   contenido.innerHTML = `<h2>Favoritos</h2>`;
+  if (favoritos.length === 0) {
+    contenido.innerHTML += `<p>No tienes favoritos aún.</p>`;
+    return;
+  }
+
   favoritos.forEach(nombre => {
     contenido.innerHTML += `
       <div class="card">
@@ -104,6 +119,7 @@ function mostrarFormularioRegistro() {
       ).join('')}
       <button type="submit">Registrar</button>
     </form>`;
+
   document.getElementById('registroForm').onsubmit = async (e) => {
     e.preventDefault();
     const datos = Object.fromEntries(new FormData(e.target));
@@ -126,4 +142,5 @@ search.addEventListener('input', () => {
   });
 });
 
+// Cargar inicio por defecto
 navigate('inicio');

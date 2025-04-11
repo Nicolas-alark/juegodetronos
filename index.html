@@ -1,34 +1,32 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Juego de Tronos App</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <header>
-    <input type="text" id="search" placeholder="Buscar personajes, casas, etc..." />
+    <h1>Juego de Tronos</h1>
+    <input type="text" id="search" placeholder="Buscar...">
   </header>
 
-  <nav class="menu">
+  <nav>
     <button onclick="navigate('personajes')">Personajes</button>
     <button onclick="navigate('casas')">Casas</button>
-    <button onclick="navigate('favoritos')">Favoritos</button>
-    <button onclick="navigate('registro')">Registro</button>
-  </nav>
-
-  <main id="contenido">
-    <!-- Contenido dinámico -->
-  </main>
-
-  <footer>
     <button onclick="navigate('libros')">Libros</button>
     <button onclick="navigate('capitulos')">Capítulos</button>
-    <button onclick="verAleatorio()">Aleatorio</button>
-    <button onclick="navigate('inicio')">Inicio</button>
-  </footer>
+    <button onclick="navigate('favoritos')">Favoritos</button>
+    <button onclick="navigate('registro')">Registro</button>
+    <button onclick="verAleatorio()">Ruleta</button>
+  </nav>
 
+  <main>
+    <div id="contenido" class="page active"></div>
+  </main>
+
+  <!-- Firebase y lógica principal -->
   <script type="module" src="app.js"></script>
 </body>
 </html>
