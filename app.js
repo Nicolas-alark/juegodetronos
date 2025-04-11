@@ -34,7 +34,9 @@ function crearCard(item, esFavorito = false) {
   div.className = 'card';
 
   div.innerHTML = `
-    <img src="${item.imageUrl ? item.imageUrl : 'https://dummyimage.com/250x350/ccc/000&text=' + encodeURIComponent(item.name || 'Sin imagen')}" alt="${item.fullName || item.name}" onerror="this.onerror=null;this.src='https://dummyimage.com/250x350/ccc/000&text=Sin+imagen';">
+    <img src="${item.imageUrl ? item.imageUrl : 'https://dummyimage.com/250x350/ccc/000&text=' + encodeURIComponent(item.name || 'Sin imagen')}" 
+         alt="${item.fullName || item.name}" 
+         onerror="this.onerror=null;this.src='https://dummyimage.com/250x350/ccc/000&text=Sin+imagen';">
     <h3>${item.fullName || item.name}</h3>
     ${item.title ? `<p>${item.title}</p>` : ''}
     ${item.family ? `<p><strong>Casa:</strong> ${item.family}</p>` : ''}
@@ -123,7 +125,7 @@ async function cargarCasas() {
       const casaItem = {
         id: `casa-${i}`,
         name: casa,
-        imageUrl: 'https://via.placeholder.com/250x350?text=' + encodeURIComponent(casa)
+        imageUrl: 'https://dummyimage.com/250x350/aaa/000&text=' + encodeURIComponent(casa)
       };
       const card = crearCard(casaItem);
       casasEl.appendChild(card);
@@ -167,7 +169,7 @@ async function girarRuleta(tipo) {
       item = {
         id: `casa-${casa}`,
         name: casa,
-        imageUrl: 'https://via.placeholder.com/250x350?text=' + encodeURIComponent(casa)
+        imageUrl: 'https://dummyimage.com/250x350/aaa/000&text=' + encodeURIComponent(casa)
       };
     }
 
