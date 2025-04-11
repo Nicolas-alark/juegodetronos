@@ -1,11 +1,11 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAxoML4YCtAtcVu51yN379j0Fg7gh4mIiY",
   authDomain: "juegodetronos-dff8d.firebaseapp.com",
   projectId: "juegodetronos-dff8d",
-  storageBucket: "juegodetronos-dff8d.firebasestorage.app",
+  storageBucket: "juegodetronos-dff8d",
   messagingSenderId: "16676089058",
   appId: "1:16676089058:web:d8423b6df3da72e223c2bb"
 };
@@ -13,106 +13,117 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const API_URL = "https://thronesapi.com/api/v2/";
-const searchInput = document.getElementById('search');
+const apiBase = "https://api.gameofthronesquotes.xyz/v1";
 
-function showSection(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+const contenido = document.getElementById('contenido');
+const search = document.getElementById('search');
+
+let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
+
+function navigate(tab) {
+  switch (tab) {
+    case 'personajes':
+      fetch(`${apiBase}/characters`)
+        .then(res => res.json())
+        .then(data => mostrarLista(data, 'personaje'));
+      break;
+    case 'casas':
+      fetch(`${apiBase}/houses`)
+        .then(res => res.json())
+        .then(data => mostrarLista(data, 'casa'));
+      break;
+    case 'favoritos':
+      mostrarFavoritos();
+      break;
+    case 'registro':
+      mostrarFormularioRegistro();
+      break;
+    case 'libros':
+      fetch(`${apiBase}/books`)
+        .then(res => res.json())
+        .then(data => mostrarLista(data, 'libro'));
+      break;
+    case 'capitulos':
+      fetch(`${apiBase}/random/5`)
+        .then(res => res.json())
+        .then(data => mostrarLista(data, 'capitulo'));
+      break;
+    case 'inicio':
+    default:
+      contenido.innerHTML = `<h2>Bienvenido a Juego de Tronos App</h2>`;
+  }
 }
 
-async function fetchData(endpoint) {
-  const res = await fetch(API_URL + endpoint);
-  return await res.json();
-}
-
-function createCard(item, type) {
-  const div = document.createElement("div");
-  div.classList.add("card");
-  div.innerHTML = `
-    <h3>${item.fullName || item.name}</h3>
-    <img src="${item.imageUrl || 'https://via.placeholder.com/150'}" alt="${item.fullName || item.name}" />
-    <button onclick="addFavorito('${item.id}', '${type}')">⭐ Favorito</button>
-  `;
-  return div;
-}
-
-async function cargarPersonajes() {
-  const container = document.getElementById("personajes");
-  container.innerHTML = "";
-  const personajes = await fetchData("Characters");
-  personajes.forEach(p => container.appendChild(createCard(p, "Characters")));
-}
-
-async function cargarCasas() {
-  const container = document.getElementById("casas");
-  container.innerHTML = "";
-  const casas = await fetchData("Houses");
-  casas.forEach(c => container.appendChild(createCard(c, "Houses")));
-}
-
-function addFavorito(id, tipo) {
-  let favs = JSON.parse(localStorage.getItem("favoritos")) || [];
-  favs.push({ id, tipo });
-  localStorage.setItem("favoritos", JSON.stringify(favs));
-  alert("Agregado a favoritos");
-}
-
-function cargarFavoritos() {
-  const container = document.getElementById("favoritos");
-  container.innerHTML = "";
-  let favs = JSON.parse(localStorage.getItem("favoritos")) || [];
-  favs.forEach(async fav => {
-    const data = await fetchData(fav.tipo);
-    const item = data.find(d => d.id == fav.id);
-    if (item) container.appendChild(createCard(item, fav.tipo));
+function mostrarLista(data, tipo) {
+  contenido.innerHTML = `<h2>${tipo.toUpperCase()}S</h2>`;
+  data.forEach(item => {
+    const nombre = item.name || item;
+    const imagen = item.image || "";
+    contenido.innerHTML += `
+      <div class="card">
+        ${imagen ? `<img src="${imagen}" alt="${nombre}">` : ""}
+        <div>
+          <strong>${nombre}</strong>
+          <button onclick="agregarFavorito('${nombre}')">❤️</button>
+        </div>
+      </div>`;
   });
 }
 
-async function cargarLibros() {
-  const res = await fetch("https://anapioficeandfire.com/api/books");
-  const libros = await res.json();
-  const container = document.getElementById("libros");
-  container.innerHTML = "<h2>Libros</h2>";
-  libros.forEach(libro => {
-    const div = document.createElement("div");
-    div.innerHTML = `<strong>${libro.name}</strong> - ${libro.authors.join(", ")} - ${libro.released}`;
-    container.appendChild(div);
-  });
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  cargarPersonajes();
-  cargarCasas();
-  cargarFavoritos();
-  cargarLibros();
-});
-
-window.showSection = showSection;
-window.addFavorito = addFavorito;
-
-searchInput.addEventListener("input", e => {
-  const query = e.target.value.toLowerCase();
-  document.querySelectorAll(".card").forEach(card => {
-    card.style.display = card.textContent.toLowerCase().includes(query) ? "" : "none";
-  });
-});
-
-window.girarRuleta = async function(tipo) {
-  const data = await fetchData(tipo === "characters" ? "Characters" : "Houses");
-  const random = data[Math.floor(Math.random() * data.length)];
-  document.getElementById("resultadoRuleta").innerHTML = `
-    <h3>${random.fullName || random.name}</h3>
-    <img src="${random.imageUrl || 'https://via.placeholder.com/150'}" />
-  `;
+window.agregarFavorito = function(nombre) {
+  if (!favoritos.includes(nombre)) {
+    favoritos.push(nombre);
+    localStorage.setItem('favoritos', JSON.stringify(favoritos));
+    alert('Agregado a favoritos');
+  }
 };
 
-document.getElementById("registroForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const campos = [...e.target.querySelectorAll("input")];
-  const datos = {};
-  campos.forEach(input => datos[input.placeholder] = input.value);
-  await addDoc(collection(db, "usuarios"), datos);
-  alert("Usuario registrado con éxito");
-  e.target.reset();
+function mostrarFavoritos() {
+  contenido.innerHTML = `<h2>Favoritos</h2>`;
+  favoritos.forEach(nombre => {
+    contenido.innerHTML += `
+      <div class="card">
+        <strong>${nombre}</strong>
+        <button onclick="eliminarFavorito('${nombre}')">❌</button>
+      </div>`;
+  });
+}
+
+window.eliminarFavorito = function(nombre) {
+  favoritos = favoritos.filter(f => f !== nombre);
+  localStorage.setItem('favoritos', JSON.stringify(favoritos));
+  mostrarFavoritos();
+};
+
+function mostrarFormularioRegistro() {
+  contenido.innerHTML = `
+    <h2>Registro</h2>
+    <form id="registroForm">
+      ${['Nombre', 'Apellido', 'Email', 'Contraseña', 'Edad', 'País', 'Usuario'].map(campo =>
+        `<input name="${campo.toLowerCase()}" placeholder="${campo}" required />`
+      ).join('')}
+      <button type="submit">Registrar</button>
+    </form>`;
+  document.getElementById('registroForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const datos = Object.fromEntries(new FormData(e.target));
+    await addDoc(collection(db, "usuarios"), datos);
+    alert('Registrado correctamente');
+    e.target.reset();
+  };
+}
+
+window.verAleatorio = async function () {
+  const res = await fetch(`${apiBase}/character/random`);
+  const data = await res.json();
+  mostrarLista([data], 'personaje');
+};
+
+search.addEventListener('input', () => {
+  const termino = search.value.toLowerCase();
+  document.querySelectorAll('.card').forEach(card => {
+    card.style.display = card.innerText.toLowerCase().includes(termino) ? '' : 'none';
+  });
 });
+
+navigate('inicio');
