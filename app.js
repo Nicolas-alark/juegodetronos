@@ -1,4 +1,4 @@
-// 🔥 1. Configuración de Firebase (ya con tus datos reales)
+// 🔥 1. Configuración de Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
@@ -21,6 +21,14 @@ const librosEl = document.getElementById('libros');
 const favoritosEl = document.getElementById('favoritos');
 const searchInput = document.getElementById('search');
 const resultadoRuleta = document.getElementById('resultadoRuleta');
+
+// Botones
+const btnPersonajes = document.getElementById('btnPersonajes');
+const btnCasas = document.getElementById('btnCasas');
+const btnFavoritos = document.getElementById('btnFavoritos');
+const btnRegistro = document.getElementById('btnRegistro');
+const ruletaPersonaje = document.getElementById('ruletaPersonaje');
+const ruletaCasa = document.getElementById('ruletaCasa');
 
 let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
 
@@ -147,11 +155,6 @@ function cargarLibros() {
   });
 }
 
-function mostrarRuleta() {
-  showSection('ruleta');
-  resultadoRuleta.innerHTML = '';
-}
-
 async function girarRuleta(tipo) {
   resultadoRuleta.innerHTML = '<p>Cargando...</p>';
   try {
@@ -181,6 +184,7 @@ async function girarRuleta(tipo) {
   }
 }
 
+// Event Listeners
 document.getElementById('registroForm')?.addEventListener('submit', e => {
   e.preventDefault();
   alert('Registro exitoso');
@@ -193,6 +197,14 @@ searchInput.addEventListener('input', () => {
     el.style.display = el.textContent.toLowerCase().includes(query) ? '' : 'none';
   });
 });
+
+// Eventos para los botones
+btnPersonajes.addEventListener('click', () => showSection('personajes'));
+btnCasas.addEventListener('click', () => showSection('casas'));
+btnFavoritos.addEventListener('click', () => showSection('favoritos'));
+btnRegistro.addEventListener('click', () => showSection('registro'));
+ruletaPersonaje.addEventListener('click', () => girarRuleta('characters'));
+ruletaCasa.addEventListener('click', () => girarRuleta('houses'));
 
 function init() {
   cargarPersonajes();
