@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAxoML4YCtAtcVu51yN379j0Fg7gh4mIiY",
@@ -23,14 +23,10 @@ let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
 function navigate(tab) {
   switch (tab) {
     case 'personajes':
-      fetch(`${apiBase}/characters`)
-        .then(res => res.json())
-        .then(data => mostrarLista(data, 'personaje'));
+      fetch(`${apiBase}/characters`).then(r => r.json()).then(data => mostrarLista(data, 'personaje'));
       break;
     case 'casas':
-      fetch(`${apiBase}/houses`)
-        .then(res => res.json())
-        .then(data => mostrarLista(data, 'casa'));
+      fetch(`${apiBase}/houses`).then(r => r.json()).then(data => mostrarLista(data, 'casa'));
       break;
     case 'favoritos':
       mostrarFavoritos();
@@ -39,29 +35,25 @@ function navigate(tab) {
       mostrarFormularioRegistro();
       break;
     case 'libros':
-      fetch(`${apiBase}/books`)
-        .then(res => res.json())
-        .then(data => mostrarLista(data, 'libro'));
+      fetch(`${apiBase}/books`).then(r => r.json()).then(data => mostrarLista(data, 'libro'));
       break;
     case 'capitulos':
-      fetch(`${apiBase}/random/5`)
-        .then(res => res.json())
-        .then(data => mostrarLista(data, 'capitulo'));
+      fetch(`${apiBase}/random/5`).then(r => r.json()).then(data => mostrarLista(data, 'capitulo'));
       break;
     case 'inicio':
-    default:
       contenido.innerHTML = `<h2>Bienvenido a Juego de Tronos App</h2>`;
+      break;
   }
 }
 
 function mostrarLista(data, tipo) {
   contenido.innerHTML = `<h2>${tipo.toUpperCase()}S</h2>`;
   data.forEach(item => {
-    const nombre = item.name || item;
-    const imagen = item.image || "";
+    let nombre = item.name || item;
+    let imagen = item.image || '';
     contenido.innerHTML += `
       <div class="card">
-        ${imagen ? `<img src="${imagen}" alt="${nombre}">` : ""}
+        ${imagen ? `<img src="${imagen}" alt="${nombre}">` : ''}
         <div>
           <strong>${nombre}</strong>
           <button onclick="agregarFavorito('${nombre}')">❤️</button>
@@ -76,10 +68,10 @@ window.agregarFavorito = function(nombre) {
     localStorage.setItem('favoritos', JSON.stringify(favoritos));
     alert('Agregado a favoritos');
   }
-};
+}
 
 function mostrarFavoritos() {
-  contenido.innerHTML = `<h2>Favoritos</h2>`;
+  contenido.innerHTML = `<h2>FAVORITOS</h2>`;
   favoritos.forEach(nombre => {
     contenido.innerHTML += `
       <div class="card">
@@ -93,7 +85,7 @@ window.eliminarFavorito = function(nombre) {
   favoritos = favoritos.filter(f => f !== nombre);
   localStorage.setItem('favoritos', JSON.stringify(favoritos));
   mostrarFavoritos();
-};
+}
 
 function mostrarFormularioRegistro() {
   contenido.innerHTML = `
@@ -108,20 +100,20 @@ function mostrarFormularioRegistro() {
     e.preventDefault();
     const datos = Object.fromEntries(new FormData(e.target));
     await addDoc(collection(db, "usuarios"), datos);
-    alert('Registrado correctamente');
+    alert('Registrado exitosamente');
     e.target.reset();
   };
 }
 
-window.verAleatorio = async function () {
+window.verAleatorio = async function() {
   const res = await fetch(`${apiBase}/character/random`);
   const data = await res.json();
   mostrarLista([data], 'personaje');
-};
+}
 
 search.addEventListener('input', () => {
   const termino = search.value.toLowerCase();
-  document.querySelectorAll('.card').forEach(card => {
+  [...contenido.querySelectorAll('.card')].forEach(card => {
     card.style.display = card.innerText.toLowerCase().includes(termino) ? '' : 'none';
   });
 });
