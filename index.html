@@ -6,25 +6,38 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <header>
     <h1>Juego de Tronos</h1>
     <input type="text" id="search" placeholder="Buscar...">
   </header>
 
-  <nav>
-    <button onclick="showSection('personajes')">Personajes</button>
-    <button onclick="showSection('casas')">Casas</button>
-    <button onclick="showSection('libros')">Libros</button>
-    <button onclick="mostrarRuleta()">Ruleta</button>
-    <button onclick="showSection('favoritos')">Favoritos</button>
-  </nav>
-
   <main>
     <section id="personajes" class="page active"></section>
     <section id="casas" class="page"></section>
-    <section id="libros" class="page"></section>
     <section id="favoritos" class="page"></section>
+    <section id="registro" class="page">
+      <form id="registroForm">
+        <h2>Formulario de Registro</h2>
+        <input type="text" placeholder="Nombre" required>
+        <input type="text" placeholder="Apellido" required>
+        <input type="email" placeholder="Correo" required>
+        <input type="text" placeholder="Usuario" required>
+        <input type="password" placeholder="Contraseña" required>
+        <input type="date" placeholder="Fecha de nacimiento" required>
+        <input type="text" placeholder="País" required>
+        <button type="submit">Registrar</button>
+      </form>
+    </section>
+    <section id="libros" class="page"></section>
+    <section id="capitulos" class="page">
+      <h2>Capítulos (dummy data)</h2>
+      <ul id="capitulosList">
+        <li>Temporada 1, Episodio 1: Winter Is Coming</li>
+        <li>Temporada 1, Episodio 2: The Kingsroad</li>
+        <li>Temporada 1, Episodio 3: Lord Snow</li>
+        <!-- Agrega más si lo deseas -->
+      </ul>
+    </section>
     <section id="ruleta" class="page">
       <div>
         <button onclick="girarRuleta('characters')">🎲 Personaje aleatorio</button>
@@ -34,7 +47,13 @@
     </section>
   </main>
 
-  <!-- Firebase SDK -->
+  <nav class="bottom-menu">
+    <button onclick="showSection('personajes')">Personajes</button>
+    <button onclick="showSection('casas')">Casas</button>
+    <button onclick="showSection('favoritos')">Favoritos</button>
+    <button onclick="showSection('registro')">Registro</button>
+  </nav>
+
   <script type="module" src="app.js"></script>
 </body>
 </html>
