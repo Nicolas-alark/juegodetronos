@@ -2,12 +2,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/fireba
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_PROYECTO.firebaseapp.com",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_PROJECT_ID.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID"
+  apiKey: "AIzaSyAxoML4YCtAtcVu51yN379j0Fg7gh4mIiY",
+  authDomain: "juegodetronos-dff8d.firebaseapp.com",
+  projectId: "juegodetronos-dff8d",
+  storageBucket: "juegodetronos-dff8d.firebasestorage.app",
+  messagingSenderId: "16676089058",
+  appId: "1:16676089058:web:d8423b6df3da72e223c2bb"
 };
 
 const app = initializeApp(firebaseConfig);
