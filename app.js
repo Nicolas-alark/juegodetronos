@@ -1,133 +1,205 @@
-// Firebase
+// 🔥 1. Configuración de Firebase (ya con tus datos reales)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyAxoML4YCtAtcVu51yN379j0Fg7gh4mIiY",
   authDomain: "juegodetronos-dff8d.firebaseapp.com",
   projectId: "juegodetronos-dff8d",
-  storageBucket: "juegodetronos-dff8d.firebasestorage.app",
+  storageBucket: "juegodetronos-dff8d.appspot.com",
   messagingSenderId: "16676089058",
   appId: "1:16676089058:web:d8423b6df3da72e223c2bb"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-// Navegación
-function navigateTo(tabId) {
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.classList.remove('active');
-  });
-  document.getElementById(tabId).classList.add('active');
+// DOM elements
+const personajesEl = document.getElementById('personajes');
+const casasEl = document.getElementById('casas');
+const librosEl = document.getElementById('libros');
+const favoritosEl = document.getElementById('favoritos');
+const searchInput = document.getElementById('search');
+const resultadoRuleta = document.getElementById('resultadoRuleta');
+
+let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
+
+function showSection(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-// Cargar datos
-const charactersURL = 'https://thronesapi.com/api/v2/Characters';
-const housesURL = 'https://thronesapi.com/api/v2/House';
-const booksURL = 'https://anapioficeandfire.com/api/books';
-const episodes = ['S01E01', 'S01E02', 'S01E03']; // Simulado
+function crearCard(item, esFavorito = false) {
+  const div = document.createElement('div');
+  div.className = 'card';
 
-const fetchData = async (url, containerId, isCharacter = false) => {
-  const container = document.getElementById(containerId);
-  const res = await fetch(url);
-  const data = await res.json();
+  div.innerHTML = `
+    <img src="${item.imageUrl || 'https://via.placeholder.com/250x350?text=Sin+imagen'}" alt="${item.fullName || item.name}">
+    <h3>${item.fullName || item.name}</h3>
+    ${item.title ? `<p>${item.title}</p>` : ''}
+    ${item.family ? `<p><strong>Casa:</strong> ${item.family}</p>` : ''}
+    <button class="fav">${esFavorito ? '❌' : '⭐'}</button>
+  `;
 
-  container.innerHTML = '';
-  data.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <h3>${item.fullName || item.name}</h3>
-      ${item.imageUrl ? `<img src=\"${item.imageUrl}\" alt=\"${item.fullName}\">` : ''}
-      <button onclick=\"addToFavorites(${JSON.stringify(item).replace(/\"/g, '&quot;')})\">Añadir a favoritos</button>
-    `;
-    container.appendChild(card);
-  });
-};
+  div.querySelector('button').onclick = async () => {
+    if (esFavorito) {
+      favoritos = favoritos.filter(f => f.id !== item.id);
+      await eliminarFavoritoFirestore(item.id);
+    } else if (!favoritos.find(f => f.id === item.id)) {
+      favoritos.push(item);
+      await guardarFavoritoFirestore(item);
+    }
+    localStorage.setItem('favoritos', JSON.stringify(favoritos));
+    cargarFavoritos();
+  };
 
-function addToFavorites(item) {
-  const favs = JSON.parse(localStorage.getItem('favorites')) || [];
-  favs.push(item);
-  localStorage.setItem('favorites', JSON.stringify(favs));
-  alert('Agregado a favoritos');
+  return div;
 }
 
-function loadFavorites() {
-  const container = document.getElementById('favorites');
-  const favs = JSON.parse(localStorage.getItem('favorites')) || [];
-  container.innerHTML = '<h2>Favoritos</h2>';
-  favs.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <h3>${item.fullName || item.name}</h3>
-      ${item.imageUrl ? `<img src=\"${item.imageUrl}\" alt=\"${item.fullName}\">` : ''}
-      <button onclick=\"removeFavorite('${item.id || item.name}')\">Eliminar</button>
-    `;
-    container.appendChild(card);
-  });
+async function guardarFavoritoFirestore(item) {
+  try {
+    await addDoc(collection(db, "favoritos"), item);
+  } catch (error) {
+    console.error("Error al guardar en Firestore", error);
+  }
 }
 
-function removeFavorite(id) {
-  let favs = JSON.parse(localStorage.getItem('favorites')) || [];
-  favs = favs.filter(item => (item.id || item.name) !== id);
-  localStorage.setItem('favorites', JSON.stringify(favs));
-  loadFavorites();
-}
-
-function loadBooks() {
-  fetch(booksURL)
-    .then(res => res.json())
-    .then(data => {
-      const container = document.getElementById('books');
-      container.innerHTML = '<h2>Libros</h2>';
-      data.forEach(book => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `<h3>${book.name}</h3><p>${book.released}</p>`;
-        container.appendChild(div);
-      });
+async function eliminarFavoritoFirestore(id) {
+  try {
+    const snapshot = await getDocs(collection(db, "favoritos"));
+    snapshot.forEach(docu => {
+      if (docu.data().id === id) {
+        deleteDoc(doc(db, "favoritos", docu.id));
+      }
     });
+  } catch (error) {
+    console.error("Error al eliminar de Firestore", error);
+  }
 }
 
-function loadEpisodes() {
-  const container = document.getElementById('episodes');
-  container.innerHTML = '<h2>Capítulos</h2>';
-  episodes.forEach(ep => {
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.textContent = ep;
-    container.appendChild(div);
+async function cargarFavoritos() {
+  favoritosEl.innerHTML = '<h2>Favoritos</h2>';
+
+  try {
+    const snapshot = await getDocs(collection(db, "favoritos"));
+    favoritos = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      favoritos.push(data);
+    });
+    localStorage.setItem('favoritos', JSON.stringify(favoritos));
+    favoritos.forEach(f => {
+      const card = crearCard(f, true);
+      favoritosEl.appendChild(card);
+    });
+  } catch (error) {
+    favoritosEl.innerHTML += '<p>Error al cargar favoritos desde Firestore.</p>';
+    console.error(error);
+  }
+}
+
+async function cargarPersonajes() {
+  personajesEl.innerHTML = '';
+  try {
+    const res = await fetch('https://thronesapi.com/api/v2/Characters');
+    const data = await res.json();
+    data.forEach(p => {
+      const card = crearCard(p);
+      personajesEl.appendChild(card);
+    });
+  } catch (error) {
+    personajesEl.innerHTML = '<p>Error al cargar personajes.</p>';
+    console.error(error);
+  }
+}
+
+async function cargarCasas() {
+  casasEl.innerHTML = '';
+  try {
+    const res = await fetch('https://thronesapi.com/api/v2/Characters');
+    const data = await res.json();
+    const casasUnicas = [...new Set(data.map(c => c.family).filter(Boolean))];
+    casasUnicas.forEach((casa, i) => {
+      const casaItem = {
+        id: `casa-${i}`,
+        name: casa,
+        imageUrl: 'https://via.placeholder.com/250x350?text=' + encodeURIComponent(casa)
+      };
+      const card = crearCard(casaItem);
+      casasEl.appendChild(card);
+    });
+  } catch (error) {
+    casasEl.innerHTML = '<p>Error al cargar casas.</p>';
+    console.error(error);
+  }
+}
+
+function cargarLibros() {
+  librosEl.innerHTML = '';
+  const libros = [
+    { id: 1, name: "Juego de Tronos", imageUrl: "https://m.media-amazon.com/images/I/91JgkRAqNEL.jpg" },
+    { id: 2, name: "Choque de Reyes", imageUrl: "https://m.media-amazon.com/images/I/81ndLw7ZVXL.jpg" },
+    { id: 3, name: "Tormenta de Espadas", imageUrl: "https://m.media-amazon.com/images/I/91GGDFXNGhL.jpg" },
+  ];
+  libros.forEach(libro => {
+    const card = crearCard(libro);
+    librosEl.appendChild(card);
   });
 }
 
-function randomRoulette() {
-  const choice = Math.random() < 0.5 ? 'character' : 'house';
-  const url = choice === 'character' ? charactersURL : housesURL;
-
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      const item = data[Math.floor(Math.random() * data.length)];
-      document.getElementById('rouletteResult').innerHTML = `
-        <h3>${item.fullName || item.name}</h3>
-        ${item.imageUrl ? `<img src=\"${item.imageUrl}\" alt=\"${item.fullName}\">` : ''}
-      `;
-    });
+function mostrarRuleta() {
+  showSection('ruleta');
+  resultadoRuleta.innerHTML = '';
 }
 
-// Búsqueda
-document.getElementById('searchBar').addEventListener('input', function () {
-  const value = this.value.toLowerCase();
-  document.querySelectorAll('.card').forEach(card => {
-    const text = card.textContent.toLowerCase();
-    card.style.display = text.includes(value) ? 'block' : 'none';
+async function girarRuleta(tipo) {
+  resultadoRuleta.innerHTML = '<p>Cargando...</p>';
+  try {
+    const res = await fetch('https://thronesapi.com/api/v2/Characters');
+    const data = await res.json();
+
+    let item;
+    if (tipo === 'characters') {
+      item = data[Math.floor(Math.random() * data.length)];
+    } else {
+      const casas = [...new Set(data.map(c => c.family).filter(Boolean))];
+      const casa = casas[Math.floor(Math.random() * casas.length)];
+      item = {
+        id: `casa-${casa}`,
+        name: casa,
+        imageUrl: 'https://via.placeholder.com/250x350?text=' + encodeURIComponent(casa)
+      };
+    }
+
+    resultadoRuleta.innerHTML = '';
+    const card = crearCard(item);
+    resultadoRuleta.appendChild(card);
+
+  } catch (error) {
+    resultadoRuleta.innerHTML = '<p>Error al girar la ruleta.</p>';
+    console.error(error);
+  }
+}
+
+document.getElementById('registroForm')?.addEventListener('submit', e => {
+  e.preventDefault();
+  alert('Registro exitoso');
+  e.target.reset();
+});
+
+searchInput.addEventListener('input', () => {
+  const query = searchInput.value.toLowerCase();
+  document.querySelectorAll('.page.active .card').forEach(el => {
+    el.style.display = el.textContent.toLowerCase().includes(query) ? '' : 'none';
   });
 });
 
-// Inicialización
-window.onload = () => {
-  fetchData(charactersURL, 'characters');
-  fetchData(housesURL, 'houses');
-  loadFavorites();
-  loadBooks();
-  loadEpisodes();
-};
+function init() {
+  cargarPersonajes();
+  cargarCasas();
+  cargarLibros();
+  cargarFavoritos();
+  showSection('personajes');
+}
+
+init();
