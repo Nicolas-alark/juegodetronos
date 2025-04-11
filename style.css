@@ -1,100 +1,61 @@
 body {
   font-family: Arial, sans-serif;
   margin: 0;
-  background: #111;
-  color: #fff;
+  background-color: #f0f0f0;
 }
 
 header {
-  background: #222;
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: #000;
+  color: #fff;
+  padding: 10px;
+  text-align: center;
 }
 
-h1 {
-  margin: 0;
-}
-
-input#search {
-  padding: 0.5rem;
-  border-radius: 5px;
-  border: none;
+header input {
+  margin-top: 10px;
+  padding: 8px;
+  width: 80%;
+  max-width: 400px;
 }
 
 nav {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
-  background: #333;
-  padding: 0.5rem;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  z-index: 1000;
+  justify-content: center;
+  background-color: #222;
 }
 
 nav button {
-  background: #444;
-  color: white;
+  flex: 1 0 30%;
+  margin: 5px;
+  padding: 10px;
+  background-color: #444;
+  color: #fff;
   border: none;
-  padding: 0.6rem;
-  margin: 0.2rem;
-  border-radius: 10px;
   cursor: pointer;
 }
 
 nav button:hover {
-  background: #666;
+  background-color: #666;
 }
 
 main {
-  padding: 1rem;
-  padding-bottom: 4rem; /* para no tapar con el nav */
+  padding: 20px;
 }
 
 .card {
-  background: #1c1c1c;
-  border-radius: 10px;
-  padding: 1rem;
-  margin: 1rem 0;
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px 0;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   display: flex;
-  gap: 1rem;
   align-items: center;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+  gap: 15px;
 }
 
 .card img {
   width: 100px;
   height: auto;
-  border-radius: 8px;
-}
-
-.card button {
-  background: crimson;
-  color: white;
-  border: none;
-  padding: 0.4rem 0.6rem;
   border-radius: 5px;
-  cursor: pointer;
-  margin-left: auto;
-}
-
-form input {
-  display: block;
-  margin: 0.5rem 0;
-  padding: 0.6rem;
-  width: 100%;
-  border-radius: 5px;
-  border: none;
-}
-
-form button {
-  padding: 0.6rem;
-  background: teal;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
 }
