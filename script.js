@@ -11,7 +11,7 @@ function showSection(id) {
   document.getElementById(id).classList.add('active');
 }
 
-function crearElementoFavorito(item, tipo) {
+function crearElementoFavorito(item) {
   const div = document.createElement('div');
   div.textContent = item.fullName || item.title || item.name || '(Sin nombre)';
   const btn = document.createElement('button');
@@ -36,41 +36,55 @@ function agregarAFavoritos(item) {
 function cargarFavoritos() {
   favoritosEl.innerHTML = '<h2>Favoritos</h2>';
   favoritos.forEach(fav => {
-    const el = crearElementoFavorito(fav, fav.house ? 'casa' : 'personaje');
+    const el = crearElementoFavorito(fav);
     favoritosEl.appendChild(el);
   });
 }
 
 async function cargarPersonajes() {
   personajesEl.innerHTML = '<h2>Personajes</h2>';
-  const res = await fetch('https://thronesapi.com/api/v2/Characters');
-  const data = await res.json();
-  data.forEach(item => {
-    const div = document.createElement('div');
-    div.textContent = item.fullName || item.title || '(Sin nombre)';
-    const btn = document.createElement('button');
-    btn.textContent = '⭐';
-    btn.onclick = () => agregarAFavoritos(item);
-    div.appendChild(btn);
-    personajesEl.appendChild(div);
-  });
+  try {
+    const res = await fetch('https://thronesapi.com/api/v2/Characters');
+    const data = await res.json();
+    data.forEach(item => {
+      const div = document.createElement('div');
+      div.textContent = item.fullName || item.title || '(Sin nombre)';
+      const btn = document.createElement('button');
+      btn.textContent = '⭐';
+      btn.onclick = () => agregarAFavoritos(item);
+      div.appendChild(btn);
+      personajesEl.appendChild(div);
+    });
+  } catch (error) {
+    personajesEl.innerHTML += '<p>Error al cargar personajes.</p>';
+    console.error(error);
+  }
 }
 
 async function cargarCasas() {
   casasEl.innerHTML = '<h2>Casas</h2>';
-  const res = await fetch('https://thronesapi.com/api/v2/Characters');
-  const data = await res.json();
-  const casas = [...new Set(data.map(c => c.family).filter(Boolean))];
-  casas.forEach((casa, index) => {
-    const item = { id: index, name: casa };
-    const div = document.createElement('div');
-    div.textContent = casa;
-    const btn = document.createElement('button');
-    btn.textContent = '⭐';
-    btn.onclick = () => agregarAFavoritos(item);
-    div.appendChild(btn);
-    casasEl.appendChild(div);
-  });
+  try {
+    const res = await fetch('https://thronesapi.com/api/v2/Characters');
+    const data = await res.json();
+    const casas = [...new Set(data.map(c => c.family).filter(Boolean))];
+    casas.forEach((casa, index) => {
+      const item = { id: `casa-${index}`, name: casa };
+      const div = document.createElement('div');
+      div.textContent = casa;
+      const btn = document.createElement('button');
+      btn.textContent = '⭐';
+      btn.onclick = () => agregarAFavoritos(item);
+      div.appendChild(btn);
+      casasEl.appendChild(div);
+    });
+  } catch (error) {
+    casasEl.innerHTML += '<p>Error al cargar casas.</p>';
+    console.error(error);
+  }
+}
+
+function cargarLibros() {
+  librosEl.innerHTML = '<h2>Libros</h2><p>Funcionalidad pendiente.</p>';
 }
 
 document.getElementById('registroForm').addEventListener('submit', e => {
@@ -86,8 +100,43 @@ searchInput.addEventListener('input', () => {
   });
 });
 
-function cargarLibros() {
-  librosEl.innerHTML = '<h2>Libros</h2><p>Funcionalidad pendiente.</p>';
+function mostrarRuleta() {
+  showSection('ruleta');
+  document.getElementById('resultadoRuleta').innerHTML = '';
+}
+
+async function girarRuleta(tipo) {
+  const resultado = document.getElementById('resultadoRuleta');
+  resultado.innerHTML = '<p>Cargando...</p>';
+
+  try {
+    const res = await fetch('https://thronesapi.com/api/v2/Characters');
+    const data = await res.json();
+
+    let item;
+    if (tipo === 'characters') {
+      item = data[Math.floor(Math.random() * data.length)];
+    } else {
+      const casas = [...new Set(data.map(c => c.family).filter(Boolean))];
+      const casa = casas[Math.floor(Math.random() * casas.length)];
+      item = { id: casa, name: casa };
+    }
+
+    const detalles = [
+      `<strong>Nombre:</strong> ${item.fullName || item.name || '(Sin nombre)'}`,
+      item.title ? `<strong>Título:</strong> ${item.title}` : '',
+      item.family ? `<strong>Casa:</strong> ${item.family}` : ''
+    ].filter(Boolean).join('<br>');
+
+    resultado.innerHTML = `
+      <h3>${tipo === 'characters' ? 'Personaje' : 'Casa'} Seleccionado</h3>
+      <p>${detalles}</p>
+      <button onclick='agregarAFavoritos(${JSON.stringify(item).replace(/"/g, '&quot;')})'>⭐ Agregar a favoritos</button>
+    `;
+  } catch (error) {
+    resultado.innerHTML = '<p>Error al girar ruleta.</p>';
+    console.error(error);
+  }
 }
 
 function init() {
@@ -96,38 +145,6 @@ function init() {
   cargarLibros();
   cargarFavoritos();
   showSection('personajes');
-}
-
-function mostrarRuleta() {
-  showSection('ruleta');
-  document.getElementById('resultadoRuleta').innerHTML = '';
-}
-
-async function girarRuleta(tipo) {
-  const res = await fetch('https://thronesapi.com/api/v2/Characters');
-  const data = await res.json();
-
-  let item;
-  if (tipo === 'characters') {
-    item = data[Math.floor(Math.random() * data.length)];
-  } else {
-    const casas = [...new Set(data.map(c => c.family).filter(Boolean))];
-    const casa = casas[Math.floor(Math.random() * casas.length)];
-    item = { name: casa, id: casa };
-  }
-
-  const resultado = document.getElementById('resultadoRuleta');
-  const detalles = [
-    `<strong>Nombre:</strong> ${item.fullName || item.name || '(Sin nombre)'}`,
-    item.title ? `<strong>Título:</strong> ${item.title}` : '',
-    item.family ? `<strong>Casa:</strong> ${item.family}` : ''
-  ].filter(Boolean).join('<br>');
-
-  resultado.innerHTML = `
-    <h3>${tipo === 'characters' ? 'Personaje' : 'Casa'} Seleccionado</h3>
-    <p>${detalles}</p>
-    <button onclick='agregarAFavoritos(${JSON.stringify(item).replace(/'/g, "\'")})'>⭐ Agregar a favoritos</button>
-  `;
 }
 
 init();
