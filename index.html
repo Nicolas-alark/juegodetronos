@@ -1,49 +1,49 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Juego de Tronos</title>
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-  <script defer src="app.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego de Tronos Web</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Juego de Tronos</h1>
-    <input type="text" id="searchBar" placeholder="Buscar..." />
-  </header>
 
-  <main>
-    <section id="characters" class="tab active"></section>
-    <section id="houses" class="tab"></section>
-    <section id="favorites" class="tab"></section>
-    <section id="register" class="tab">
-      <form id="registerForm">
-        <input type="text" placeholder="Nombre" required />
-        <input type="text" placeholder="Apellido" required />
-        <input type="email" placeholder="Correo" required />
-        <input type="password" placeholder="Contraseña" required />
-        <input type="number" placeholder="Edad" required />
-        <input type="text" placeholder="Ciudad" required />
-        <input type="text" placeholder="País" required />
-        <button type="submit">Registrar</button>
-      </form>
-    </section>
-    <section id="books" class="tab"></section>
-    <section id="episodes" class="tab"></section>
-    <section id="roulette" class="tab">
-      <button onclick="randomRoulette()">Ruleta de Personajes/Casas</button>
-      <div id="rouletteResult"></div>
-    </section>
-  </main>
+  <!-- Buscador -->
+  <input type="text" id="search" placeholder="Buscar personajes, casas, libros...">
 
-  <nav id="bottomMenu">
-    <button onclick="navigateTo('characters')">Personajes</button>
-    <button onclick="navigateTo('houses')">Casas</button>
-    <button onclick="navigateTo('favorites')">Favoritos</button>
-    <button onclick="navigateTo('register')">Registro</button>
+  <!-- Pestañas principales -->
+  <div id="personajes" class="page active"></div>
+  <div id="casas" class="page"></div>
+  <div id="favoritos" class="page"></div>
+  <div id="registro" class="page">
+    <h2>Registro</h2>
+    <form id="registroForm">
+      <input type="text" placeholder="Nombre completo" required>
+      <input type="email" placeholder="Correo" required>
+      <input type="password" placeholder="Contraseña" required>
+      <input type="text" placeholder="Usuario" required>
+      <input type="text" placeholder="País" required>
+      <input type="number" placeholder="Edad" required>
+      <input type="tel" placeholder="Teléfono" required>
+      <button type="submit">Registrar</button>
+    </form>
+  </div>
+  <div id="libros" class="page"></div>
+  <div id="ruleta" class="page">
+    <h2>Ruleta aleatoria</h2>
+    <button onclick="girarRuleta('characters')">Personaje aleatorio</button>
+    <button onclick="girarRuleta('houses')">Casa aleatoria</button>
+    <div id="resultadoRuleta"></div>
+  </div>
+
+  <!-- Menú inferior -->
+  <nav class="bottom-menu">
+    <button onclick="showSection('personajes')">Personajes</button>
+    <button onclick="showSection('casas')">Casas</button>
+    <button onclick="showSection('favoritos')">Favoritos</button>
+    <button onclick="showSection('registro')">Registro</button>
   </nav>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>
