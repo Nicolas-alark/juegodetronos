@@ -1,4 +1,3 @@
-const apiBase = 'https://anapioficeandfire.com/api/';
 const personajesEl = document.getElementById('personajes');
 const casasEl = document.getElementById('casas');
 const librosEl = document.getElementById('libros');
@@ -14,11 +13,11 @@ function showSection(id) {
 
 function crearElementoFavorito(item, tipo) {
   const div = document.createElement('div');
-  div.textContent = tipo === 'personaje' ? item.name || '(Sin nombre)' : item.name;
+  div.textContent = item.fullName || item.title || item.name || '(Sin nombre)';
   const btn = document.createElement('button');
   btn.textContent = '❌';
   btn.onclick = () => {
-    favoritos = favoritos.filter(f => f.url !== item.url);
+    favoritos = favoritos.filter(f => f.id !== item.id);
     localStorage.setItem('favoritos', JSON.stringify(favoritos));
     cargarFavoritos();
   };
@@ -27,7 +26,7 @@ function crearElementoFavorito(item, tipo) {
 }
 
 function agregarAFavoritos(item) {
-  if (!favoritos.find(f => f.url === item.url)) {
+  if (!favoritos.find(f => f.id === item.id)) {
     favoritos.push(item);
     localStorage.setItem('favoritos', JSON.stringify(favoritos));
     cargarFavoritos();
@@ -37,23 +36,40 @@ function agregarAFavoritos(item) {
 function cargarFavoritos() {
   favoritosEl.innerHTML = '<h2>Favoritos</h2>';
   favoritos.forEach(fav => {
-    const el = crearElementoFavorito(fav, fav.url.includes('characters') ? 'personaje' : 'casa');
+    const el = crearElementoFavorito(fav, fav.house ? 'casa' : 'personaje');
     favoritosEl.appendChild(el);
   });
 }
 
-async function cargarDatos(endpoint, container, tipo) {
-  container.innerHTML = `<h2>${tipo.charAt(0).toUpperCase() + tipo.slice(1)}</h2>`;
-  const res = await fetch(apiBase + endpoint + '?page=1&pageSize=10');
+async function cargarPersonajes() {
+  personajesEl.innerHTML = '<h2>Personajes</h2>';
+  const res = await fetch('https://thronesapi.com/api/v2/Characters');
   const data = await res.json();
   data.forEach(item => {
     const div = document.createElement('div');
-    div.textContent = item.name || '(Sin nombre)';
+    div.textContent = item.fullName || item.title || '(Sin nombre)';
     const btn = document.createElement('button');
     btn.textContent = '⭐';
     btn.onclick = () => agregarAFavoritos(item);
     div.appendChild(btn);
-    container.appendChild(div);
+    personajesEl.appendChild(div);
+  });
+}
+
+async function cargarCasas() {
+  casasEl.innerHTML = '<h2>Casas</h2>';
+  const res = await fetch('https://thronesapi.com/api/v2/Characters');
+  const data = await res.json();
+  const casas = [...new Set(data.map(c => c.family).filter(Boolean))];
+  casas.forEach((casa, index) => {
+    const item = { id: index, name: casa };
+    const div = document.createElement('div');
+    div.textContent = casa;
+    const btn = document.createElement('button');
+    btn.textContent = '⭐';
+    btn.onclick = () => agregarAFavoritos(item);
+    div.appendChild(btn);
+    casasEl.appendChild(div);
   });
 }
 
@@ -71,12 +87,12 @@ searchInput.addEventListener('input', () => {
 });
 
 function cargarLibros() {
-  cargarDatos('books', librosEl, 'libros');
+  librosEl.innerHTML = '<h2>Libros</h2><p>Funcionalidad pendiente.</p>';
 }
 
 function init() {
-  cargarDatos('characters', personajesEl, 'personajes');
-  cargarDatos('houses', casasEl, 'casas');
+  cargarPersonajes();
+  cargarCasas();
   cargarLibros();
   cargarFavoritos();
   showSection('personajes');
@@ -88,18 +104,23 @@ function mostrarRuleta() {
 }
 
 async function girarRuleta(tipo) {
-  const endpoint = tipo === 'characters' ? 'characters' : 'houses';
-  const randomPage = Math.floor(Math.random() * 20) + 1;
-  const res = await fetch(`${apiBase}${endpoint}?page=${randomPage}&pageSize=10`);
+  const res = await fetch('https://thronesapi.com/api/v2/Characters');
   const data = await res.json();
-  const item = data[Math.floor(Math.random() * data.length)];
-  const resultado = document.getElementById('resultadoRuleta');
 
+  let item;
+  if (tipo === 'characters') {
+    item = data[Math.floor(Math.random() * data.length)];
+  } else {
+    const casas = [...new Set(data.map(c => c.family).filter(Boolean))];
+    const casa = casas[Math.floor(Math.random() * casas.length)];
+    item = { name: casa, id: casa };
+  }
+
+  const resultado = document.getElementById('resultadoRuleta');
   const detalles = [
-    `<strong>Nombre:</strong> ${item.name || '(Sin nombre)'}`,
-    item.region ? `<strong>Región:</strong> ${item.region}` : '',
-    item.titles?.length ? `<strong>Títulos:</strong> ${item.titles.filter(Boolean).join(', ')}` : '',
-    item.words ? `<strong>Lema:</strong> ${item.words}` : ''
+    `<strong>Nombre:</strong> ${item.fullName || item.name || '(Sin nombre)'}`,
+    item.title ? `<strong>Título:</strong> ${item.title}` : '',
+    item.family ? `<strong>Casa:</strong> ${item.family}` : ''
   ].filter(Boolean).join('<br>');
 
   resultado.innerHTML = `
