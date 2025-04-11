@@ -1,26 +1,25 @@
-// 🔥 1. Configuración de Firebase (reemplaza con tus datos reales)
+// Firebase + Thrones App - JS completo
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "TU_API_KEY",
-  authDomain: "TU_PROYECTO.firebaseapp.com",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_PROJECT_ID.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
+  authDomain: "TU_DOMINIO.firebaseapp.com",
+  projectId: "TU_PROYECTO",
+  storageBucket: "TU_PROYECTO.appspot.com",
+  messagingSenderId: "TU_ID",
   appId: "TU_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// DOM elements
 const personajesEl = document.getElementById('personajes');
 const casasEl = document.getElementById('casas');
 const librosEl = document.getElementById('libros');
 const favoritosEl = document.getElementById('favoritos');
-const searchInput = document.getElementById('search');
 const resultadoRuleta = document.getElementById('resultadoRuleta');
+const searchInput = document.getElementById('search');
 
 let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
 
@@ -34,7 +33,9 @@ function crearCard(item, esFavorito = false) {
   div.className = 'card';
 
   div.innerHTML = `
-    <img src="${item.imageUrl || 'https://via.placeholder.com/250x350?text=Sin+imagen'}" alt="${item.fullName || item.name}">
+    <img src="${item.imageUrl ? item.imageUrl : 'https://dummyimage.com/250x350/ccc/000&text=' + encodeURIComponent(item.name || 'Sin imagen')}" 
+         alt="${item.fullName || item.name}" 
+         onerror="this.onerror=null;this.src='https://dummyimage.com/250x350/ccc/000&text=Sin+imagen';">
     <h3>${item.fullName || item.name}</h3>
     ${item.title ? `<p>${item.title}</p>` : ''}
     ${item.family ? `<p><strong>Casa:</strong> ${item.family}</p>` : ''}
@@ -60,7 +61,7 @@ async function guardarFavoritoFirestore(item) {
   try {
     await addDoc(collection(db, "favoritos"), item);
   } catch (error) {
-    console.error("Error al guardar en Firestore", error);
+    console.error("Error guardando en Firestore", error);
   }
 }
 
@@ -73,7 +74,7 @@ async function eliminarFavoritoFirestore(id) {
       }
     });
   } catch (error) {
-    console.error("Error al eliminar de Firestore", error);
+    console.error("Error eliminando de Firestore", error);
   }
 }
 
@@ -83,17 +84,11 @@ async function cargarFavoritos() {
   try {
     const snapshot = await getDocs(collection(db, "favoritos"));
     favoritos = [];
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      favoritos.push(data);
-    });
+    snapshot.forEach(doc => favoritos.push(doc.data()));
     localStorage.setItem('favoritos', JSON.stringify(favoritos));
-    favoritos.forEach(f => {
-      const card = crearCard(f, true);
-      favoritosEl.appendChild(card);
-    });
+    favoritos.forEach(f => favoritosEl.appendChild(crearCard(f, true)));
   } catch (error) {
-    favoritosEl.innerHTML += '<p>Error al cargar favoritos desde Firestore.</p>';
+    favoritosEl.innerHTML += '<p>Error cargando favoritos.</p>';
     console.error(error);
   }
 }
@@ -103,12 +98,9 @@ async function cargarPersonajes() {
   try {
     const res = await fetch('https://thronesapi.com/api/v2/Characters');
     const data = await res.json();
-    data.forEach(p => {
-      const card = crearCard(p);
-      personajesEl.appendChild(card);
-    });
+    data.forEach(p => personajesEl.appendChild(crearCard(p)));
   } catch (error) {
-    personajesEl.innerHTML = '<p>Error al cargar personajes.</p>';
+    personajesEl.innerHTML = '<p>Error cargando personajes.</p>';
     console.error(error);
   }
 }
@@ -120,16 +112,14 @@ async function cargarCasas() {
     const data = await res.json();
     const casasUnicas = [...new Set(data.map(c => c.family).filter(Boolean))];
     casasUnicas.forEach((casa, i) => {
-      const casaItem = {
+      casasEl.appendChild(crearCard({
         id: `casa-${i}`,
         name: casa,
-        imageUrl: 'https://via.placeholder.com/250x350?text=' + encodeURIComponent(casa)
-      };
-      const card = crearCard(casaItem);
-      casasEl.appendChild(card);
+        imageUrl: 'https://dummyimage.com/250x350/aaa/000&text=' + encodeURIComponent(casa)
+      }));
     });
   } catch (error) {
-    casasEl.innerHTML = '<p>Error al cargar casas.</p>';
+    casasEl.innerHTML = '<p>Error cargando casas.</p>';
     console.error(error);
   }
 }
@@ -141,10 +131,7 @@ function cargarLibros() {
     { id: 2, name: "Choque de Reyes", imageUrl: "https://m.media-amazon.com/images/I/81ndLw7ZVXL.jpg" },
     { id: 3, name: "Tormenta de Espadas", imageUrl: "https://m.media-amazon.com/images/I/91GGDFXNGhL.jpg" },
   ];
-  libros.forEach(libro => {
-    const card = crearCard(libro);
-    librosEl.appendChild(card);
-  });
+  libros.forEach(libro => librosEl.appendChild(crearCard(libro)));
 }
 
 function mostrarRuleta() {
@@ -167,30 +154,22 @@ async function girarRuleta(tipo) {
       item = {
         id: `casa-${casa}`,
         name: casa,
-        imageUrl: 'https://via.placeholder.com/250x350?text=' + encodeURIComponent(casa)
+        imageUrl: 'https://dummyimage.com/250x350/aaa/000&text=' + encodeURIComponent(casa)
       };
     }
 
     resultadoRuleta.innerHTML = '';
-    const card = crearCard(item);
-    resultadoRuleta.appendChild(card);
-
+    resultadoRuleta.appendChild(crearCard(item));
   } catch (error) {
     resultadoRuleta.innerHTML = '<p>Error al girar la ruleta.</p>';
     console.error(error);
   }
 }
 
-document.getElementById('registroForm')?.addEventListener('submit', e => {
-  e.preventDefault();
-  alert('Registro exitoso');
-  e.target.reset();
-});
-
 searchInput.addEventListener('input', () => {
   const query = searchInput.value.toLowerCase();
-  document.querySelectorAll('.page.active .card').forEach(el => {
-    el.style.display = el.textContent.toLowerCase().includes(query) ? '' : 'none';
+  document.querySelectorAll('.page.active .card').forEach(card => {
+    card.style.display = card.textContent.toLowerCase().includes(query) ? '' : 'none';
   });
 });
 

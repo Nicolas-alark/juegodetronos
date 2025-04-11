@@ -1,64 +1,39 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Juego de Tronos App</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <header>
     <h1>Juego de Tronos</h1>
-    <input type="text" id="search" placeholder="Buscar personajes, casas...">
+    <input type="text" id="search" placeholder="Buscar...">
   </header>
 
-  <nav id="menu">
+  <nav>
     <button onclick="showSection('personajes')">Personajes</button>
     <button onclick="showSection('casas')">Casas</button>
-    <button onclick="showSection('favoritos')">Favoritos</button>
-    <button onclick="showSection('registro')">Registro</button>
     <button onclick="showSection('libros')">Libros</button>
-    <button onclick="showSection('capitulos')">Capítulos</button>
-    <button onclick="mostrarRuleta()">🎲 Ruleta</button>
+    <button onclick="mostrarRuleta()">Ruleta</button>
+    <button onclick="showSection('favoritos')">Favoritos</button>
   </nav>
 
   <main>
-    <section id="personajes" class="page"></section>
+    <section id="personajes" class="page active"></section>
     <section id="casas" class="page"></section>
-    <section id="favoritos" class="page"></section>
-    <section id="registro" class="page">
-      <form id="registroForm">
-        <input type="text" placeholder="Nombre" required />
-        <input type="email" placeholder="Email" required />
-        <input type="text" placeholder="Usuario" required />
-        <input type="password" placeholder="Contraseña" required />
-        <input type="text" placeholder="Casa favorita" required />
-        <input type="text" placeholder="Personaje favorito" required />
-        <textarea placeholder="¿Por qué te gusta la serie?" required></textarea>
-        <button type="submit">Registrarse</button>
-      </form>
-    </section>
     <section id="libros" class="page"></section>
-    <section id="capitulos" class="page">
-      <p>Puedes ver los capítulos en plataformas como HBO Max. Aquí listaremos títulos o enlaces si están disponibles públicamente.</p>
-    </section>
+    <section id="favoritos" class="page"></section>
     <section id="ruleta" class="page">
-      <h2>🎲 Ruleta de Juego de Tronos</h2>
-      <button onclick="girarRuleta('characters')">Personaje Aleatorio</button>
-      <button onclick="girarRuleta('houses')">Casa Aleatoria</button>
+      <div>
+        <button onclick="girarRuleta('characters')">🎲 Personaje aleatorio</button>
+        <button onclick="girarRuleta('houses')">🏰 Casa aleatoria</button>
+      </div>
       <div id="resultadoRuleta"></div>
     </section>
   </main>
 
-  <footer>
-    <nav id="bottom-menu">
-      <button onclick="showSection('personajes')">🏰</button>
-      <button onclick="showSection('casas')">🐺</button>
-      <button onclick="showSection('favoritos')">⭐</button>
-      <button onclick="showSection('registro')">📝</button>
-    </nav>
-  </footer>
-
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
