@@ -1,4 +1,3 @@
-// 🔥 1. Configuración de Firebase (reemplaza con tus datos reales)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
@@ -14,7 +13,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// DOM elements
 const personajesEl = document.getElementById('personajes');
 const casasEl = document.getElementById('casas');
 const librosEl = document.getElementById('libros');
@@ -181,12 +179,6 @@ async function girarRuleta(tipo) {
   }
 }
 
-document.getElementById('registroForm')?.addEventListener('submit', e => {
-  e.preventDefault();
-  alert('Registro exitoso');
-  e.target.reset();
-});
-
 searchInput.addEventListener('input', () => {
   const query = searchInput.value.toLowerCase();
   document.querySelectorAll('.page.active .card').forEach(el => {
@@ -203,3 +195,8 @@ function init() {
 }
 
 init();
+
+// ✅ Hacer funciones globales para que funcionen los botones del HTML
+window.showSection = showSection;
+window.mostrarRuleta = mostrarRuleta;
+window.girarRuleta = girarRuleta;
