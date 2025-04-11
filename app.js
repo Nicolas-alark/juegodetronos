@@ -14,21 +14,11 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const apiBase = "https://api.gameofthronesquotes.xyz/v1";
+
 const contenido = document.getElementById('contenido');
 const search = document.getElementById('search');
-let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
 
-const imagenesPersonajes = {
-  "Jon Snow": "https://upload.wikimedia.org/wikipedia/en/3/30/Jon_Snow_Season_8.png",
-  "Daenerys Targaryen": "https://upload.wikimedia.org/wikipedia/en/1/1d/Daenerys_Targaryen-Mother_of_Dragons.jpg",
-  "Tyrion Lannister": "https://upload.wikimedia.org/wikipedia/en/5/50/Tyrion_Lannister-Peter_Dinklage.jpg",
-  "Arya Stark": "https://upload.wikimedia.org/wikipedia/en/3/39/Arya_Stark-Maisie_Williams.jpg",
-  "Cersei Lannister": "https://upload.wikimedia.org/wikipedia/en/9/94/Cersei_Lannister-Lena_Headey.jpg",
-  "Sansa Stark": "https://upload.wikimedia.org/wikipedia/en/7/74/SophieTurnerasSansaStark.jpg",
-  "Bran Stark": "https://upload.wikimedia.org/wikipedia/en/6/64/Bran_Stark-The_Door.jpg",
-  "Jaime Lannister": "https://upload.wikimedia.org/wikipedia/en/7/70/Jaime_Lannister-Nikolaj_Coster-Waldau.jpg",
-  "The Hound": "https://upload.wikimedia.org/wikipedia/en/f/fd/TheHound.jpg"
-};
+let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
 
 function navigate(tab) {
   switch (tab) {
@@ -42,6 +32,12 @@ function navigate(tab) {
         .then(res => res.json())
         .then(data => mostrarLista(data, 'casa'));
       break;
+    case 'favoritos':
+      mostrarFavoritos();
+      break;
+    case 'registro':
+      mostrarFormularioRegistro();
+      break;
     case 'libros':
       fetch(`${apiBase}/books`)
         .then(res => res.json())
@@ -52,12 +48,7 @@ function navigate(tab) {
         .then(res => res.json())
         .then(data => mostrarLista(data, 'capitulo'));
       break;
-    case 'favoritos':
-      mostrarFavoritos();
-      break;
-    case 'registro':
-      mostrarFormularioRegistro();
-      break;
+    case 'inicio':
     default:
       contenido.innerHTML = `<h2>Bienvenido a Juego de Tronos App</h2>`;
   }
@@ -66,9 +57,8 @@ function navigate(tab) {
 function mostrarLista(data, tipo) {
   contenido.innerHTML = `<h2>${tipo.toUpperCase()}S</h2>`;
   data.forEach(item => {
-    const nombre = item.name || item.character?.name || item;
-    const imagen = item.image || item.character?.image || imagenesPersonajes[nombre] || "";
-
+    const nombre = item.name || item;
+    const imagen = item.image || "";
     contenido.innerHTML += `
       <div class="card">
         ${imagen ? `<img src="${imagen}" alt="${nombre}">` : ""}
@@ -91,10 +81,8 @@ window.agregarFavorito = function(nombre) {
 function mostrarFavoritos() {
   contenido.innerHTML = `<h2>Favoritos</h2>`;
   favoritos.forEach(nombre => {
-    const imagen = imagenesPersonajes[nombre] || "";
     contenido.innerHTML += `
       <div class="card">
-        ${imagen ? `<img src="${imagen}" alt="${nombre}">` : ""}
         <strong>${nombre}</strong>
         <button onclick="eliminarFavorito('${nombre}')">❌</button>
       </div>`;
